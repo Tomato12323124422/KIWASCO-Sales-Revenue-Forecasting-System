@@ -1,16 +1,10 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database import Base, engine, get_db
 from app.routers import auth, zones, customers, bills, forecasts, dashboard, reports
-
-# Create all tables (lazily)
-@app.on_event("startup")
-def on_startup():
-    try:
-        Base.metadata.create_all(bind=engine)
-    except Exception as e:
-        print(f"Startup DB Error: {e}")
+import logging
 
 app = FastAPI(
     title="KIWASCO Sales & Revenue Forecasting API",
@@ -20,7 +14,7 @@ app = FastAPI(
     redoc_url="/api/redoc",
 )
 
-# CORS — allow React frontend
+# CORS — Maximum permissiveness for Cloud demo
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -29,15 +23,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Global error handler to catch "CORS-less" 500s
-from fastapi import Request
-from fastapi.responses import JSONResponse
+# Try to create tables at startup (non-blocking)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    logging.error(f"Startup Table Creation Failed: {e}")
 
+# Global catch-all error handler to ensure JSON + CORS in all failures
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
+    logging.error(f"FATAL ERROR: {exc}")
     return JSONResponse(
         status_code=500,
-        content={"detail": f"System Error: {str(exc)}", "type": str(type(exc))},
+        content={"detail": f"Server Error: {str(exc)}", "type": str(type(exc))},
     )
 
 # Register routers
