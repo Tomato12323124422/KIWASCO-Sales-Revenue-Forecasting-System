@@ -18,7 +18,12 @@ app = FastAPI(
 # CORS — allow React frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://kiwasco-frontend.onrender.com",
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "*"
+    ],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -47,12 +52,16 @@ def health():
     return {"status": "ok"}
 
 @app.post("/api/setup-cloud-demo")
-def setup_cloud_demo(db: Session = Depends(get_db)):
+def setup_cloud_demo():
     """Initialize empty cloud database with demo accounts and data."""
+    # We do NOT use Depends(get_db) here so we can catch connection errors 
+    # inside the function and still return valid CORS headers.
+    from app.database import SessionLocal
     from app.models import User
     from app.auth import get_password_hash
     import logging
 
+    db = SessionLocal()
     try:
         # Extra step: make sure tables exist on this DB session
         Base.metadata.create_all(bind=engine)
@@ -77,13 +86,12 @@ def setup_cloud_demo(db: Session = Depends(get_db)):
             db.add(user)
         db.commit()
 
-        # Try to run seed.py logic if possible? (Optional, maybe just users for now)
-        # For simplicity, we just created accounts.
-        
         return {
             "status": "success", 
             "detail": "Demo accounts created! You can now log in."
         }
     except Exception as e:
         logging.error(f"Setup failed: {e}")
-        return {"status": "error", "detail": str(e)}
+        return {"status": "error", "detail": f"Database Error: {str(e)}"}
+    finally:
+        db.close()
