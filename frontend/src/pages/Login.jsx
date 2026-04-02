@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { loginApi } from '../api/client' // Fallback or direct use
+
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import { Droplets, Eye, EyeOff, LogIn } from 'lucide-react'
