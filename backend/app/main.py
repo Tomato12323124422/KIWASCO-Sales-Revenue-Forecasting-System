@@ -4,8 +4,13 @@ from sqlalchemy.orm import Session
 from app.database import Base, engine, get_db
 from app.routers import auth, zones, customers, bills, forecasts, dashboard, reports
 
-# Create all tables
-Base.metadata.create_all(bind=engine)
+# Create all tables (lazily)
+@app.on_event("startup")
+def on_startup():
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        print(f"Startup DB Error: {e}")
 
 app = FastAPI(
     title="KIWASCO Sales & Revenue Forecasting API",
