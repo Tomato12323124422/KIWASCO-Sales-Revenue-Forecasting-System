@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { loginApi } from '../api/client' // Fallback or direct use
 import axios from 'axios'
@@ -137,6 +137,10 @@ export default function Login() {
             {loading ? <div className="spinner" /> : <><LogIn size={16} /> Sign In</>}
           </button>
         </form>
+
+        <p style={{ textAlign: 'center', marginTop: 24, fontSize: 13, color: 'var(--text-muted)' }}>
+          Don't have an account? <Link to="/register" style={{ color: 'var(--brand-primary)', fontWeight: 600 }}>Create One</Link>
+        </p>
 
         {/* Demo accounts */}
         <div style={{ marginTop: 28, borderTop: '1px solid var(--border-subtle)', paddingTop: 20 }}>
