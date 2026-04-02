@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import Base, engine
+from sqlalchemy.orm import Session
+from app.database import Base, engine, get_db
 from app.routers import auth, zones, customers, bills, forecasts, dashboard, reports
 
 # Create all tables
