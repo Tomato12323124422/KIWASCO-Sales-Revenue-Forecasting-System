@@ -23,16 +23,22 @@ app = FastAPI(
 # CORS — allow React frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://kiwasco-frontend.onrender.com",
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "*"
-    ],
+    allow_origins=["*"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Global error handler to catch "CORS-less" 500s
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"System Error: {str(exc)}", "type": str(type(exc))},
+    )
 
 # Register routers
 app.include_router(auth.router)
