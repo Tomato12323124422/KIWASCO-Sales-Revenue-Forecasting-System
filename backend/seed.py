@@ -36,24 +36,25 @@ def months_between(start: date, end: date) -> int:
 def seed():
     db: Session = SessionLocal()
     try:
-        # ── Guard: skip if already seeded ─────────────────────────────────
-        if db.query(models.Zone).count() > 0:
-            print("✅ Database already seeded — skipping.")
-            return
-
-        print("🌱 Seeding KIWASCO database...")
+        print("🌱 Seeding/Updating KIWASCO database...")
 
         # ── Zones ─────────────────────────────────────────────────────────
         zone_objs = []
         for zd in ZONES:
+            # Check if zone already exists by name
+            existing_zone = db.query(models.Zone).filter(models.Zone.name == zd["name"]).first()
+            if existing_zone:
+                zone_objs.append(existing_zone)
+                continue
+            
             z = models.Zone(**zd)
             db.add(z)
+            db.flush() # flush to get ID
             zone_objs.append(z)
-        db.flush()
-        print(f"  ✔ {len(zone_objs)} zones created")
+            print(f"  + New zone added: {zd['name']}")
 
         # ── Users ─────────────────────────────────────────────────────────
-        users = [
+        users_to_add = [
             models.User(
                 username="admin", email="admin@kiwasco.go.ke",
                 full_name="KIWASCO Administrator",
@@ -73,9 +74,10 @@ def seed():
                 role="viewer", is_active=True,
             ),
         ]
-        for u in users:
-            db.add(u)
-        print(f"  ✔ {len(users)} users created")
+        for u in users_to_add:
+            if not db.query(models.User).filter(models.User.username == u.username).first():
+                db.add(u)
+        print("  ✔ Users check complete")
 
         # ── Customers + Bills ─────────────────────────────────────────────
         months = months_between(START_DATE, END_DATE)
@@ -83,7 +85,9 @@ def seed():
         total_customers = 0
 
         for zone in zone_objs:
-            count = get_zone_customer_count(zone.name, zone.population)
+            # ONLY generate for zones that have no customers (newly added zones)
+            if db.query(models.Customer).filter(models.Customer.zone_id == zone.id).count() > 0:
+                continue
             # Cap for performance during seeding
             count = min(count, 150)
             customer_dicts = generate_customers(zone.id, zone.name, count)
