@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useAuth } from '../context/AuthContext'
 import { zonesApi, forecastsApi } from '../api/client'
 import {
   LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid,
@@ -44,6 +45,8 @@ export default function Forecasting() {
   const [result, setResult]   = useState(null)
   const [running, setRunning] = useState(false)
   const [loading, setLoading] = useState(true)
+  const { user } = useAuth()
+  const isViewer = user?.role === 'viewer'
 
   useEffect(() => {
     zonesApi.list().then(r => {
@@ -132,9 +135,15 @@ export default function Forecasting() {
               <option value={12}>12 Months</option>
             </select>
           </div>
-          <button className="btn btn-primary" onClick={runForecast} disabled={running} style={{ height: 44 }}>
-            {running ? <><div className="spinner" /> Running Prophet…</> : <><Play size={15} /> Run Forecast</>}
-          </button>
+          {isViewer ? (
+            <div className="badge badge-info" style={{ height: 44, display: 'flex', alignItems: 'center', padding: '0 16px' }}>
+              <TrendingUp size={14} style={{ marginRight: 6 }} /> View Only Mode
+            </div>
+          ) : (
+            <button className="btn btn-primary" onClick={runForecast} disabled={running} style={{ height: 44 }}>
+              {running ? <><div className="spinner" /> Running Prophet…</> : <><Play size={15} /> Run Forecast</>}
+            </button>
+          )}
         </div>
 
         {/* Results */}

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.database import get_db
 from app import models, schemas
-from app.auth import get_current_active_user
+from app.auth import get_current_active_user, require_analyst
 from app.ml.prophet_model import forecast_zone
 
 router = APIRouter(prefix="/api/forecasts", tags=["Forecasting"])
@@ -13,7 +13,7 @@ def run_forecast(
     payload: schemas.ForecastRequest,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    _=Depends(get_current_active_user),
+    _=Depends(require_analyst),
 ):
     """Trigger a Prophet forecast for a zone."""
     zone = db.query(models.Zone).filter(models.Zone.id == payload.zone_id).first()
