@@ -18,6 +18,11 @@ ZONES = [
     {"name": "Mamboleo",        "population": 41000, "area_sqkm": 15.3, "target_revenue": 1_900_000},
     {"name": "Riat",            "population": 29000, "area_sqkm": 22.1, "target_revenue": 1_100_000},
     {"name": "Kajulu",          "population": 24000, "area_sqkm": 18.7, "target_revenue": 950_000},
+    {"name": "Milimani",        "population": 15000, "area_sqkm": 5.4,  "target_revenue": 5_500_000},
+    {"name": "Kibos",           "population": 32000, "area_sqkm": 14.2, "target_revenue": 1_400_000},
+    {"name": "Obunga",          "population": 48000, "area_sqkm": 6.8,  "target_revenue": 1_200_000},
+    {"name": "Bandani",         "population": 21000, "area_sqkm": 9.2,  "target_revenue": 850_000},
+    {"name": "Kanyakwar",       "population": 18000, "area_sqkm": 12.5, "target_revenue": 750_000},
 ]
 
 # Tariff tiers (KES per cubic meter)
@@ -41,6 +46,11 @@ ZONE_DEFAULT_RATES = {
     "Mamboleo":       0.24,
     "Riat":           0.20,
     "Kajulu":         0.18,
+    "Milimani":       0.05,
+    "Kibos":          0.25,
+    "Obunga":         0.32,
+    "Bandani":        0.29,
+    "Kanyakwar":      0.21,
 }
 
 # NRW loss rate by zone
@@ -52,6 +62,11 @@ ZONE_NRW_RATES = {
     "Mamboleo":       0.30,
     "Riat":           0.25,
     "Kajulu":         0.22,
+    "Milimani":       0.12,
+    "Kibos":          0.34,
+    "Obunga":         0.45,
+    "Bandani":        0.35,
+    "Kanyakwar":      0.28,
 }
 
 CUSTOMER_TYPE_DIST = {"domestic": 0.78, "commercial": 0.13, "industrial": 0.03, "institutional": 0.06}
