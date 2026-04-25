@@ -14,11 +14,17 @@ app = FastAPI(
     redoc_url="/api/redoc",
 )
 
-# CORS — Maximum permissiveness for Cloud demo
+# CORS Configuration
+origins = [
+    "https://kiwasco-frontend.onrender.com",
+    "http://localhost:5173",  # Local development
+    "*"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=origins,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -33,10 +39,16 @@ except Exception as e:
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     logging.error(f"FATAL ERROR: {exc}")
-    return JSONResponse(
+    response = JSONResponse(
         status_code=500,
         content={"detail": f"Server Error: {str(exc)}", "type": str(type(exc))},
     )
+    # Manually add CORS headers to errors
+    origin = request.headers.get("origin")
+    if origin:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+    return response
 
 # Register routers
 app.include_router(auth.router)
