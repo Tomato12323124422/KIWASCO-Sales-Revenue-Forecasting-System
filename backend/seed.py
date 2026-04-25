@@ -101,7 +101,7 @@ def seed():
                 db.flush()
 
                 bill_dicts = generate_bills(
-                    c.id, zone.name, c.customer_type.value,
+                    c.id, zone.name, c.customer_type,
                     start_month=START_DATE, months=months,
                 )
                 for bd in bill_dicts:
