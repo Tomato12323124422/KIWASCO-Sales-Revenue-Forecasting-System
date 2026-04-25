@@ -1,5 +1,5 @@
 """
-seed.py — Populate KIWASCO database with synthetic billing data.
+seed.py — Populate KIWASCO database with synthetic billing data (Updated April 2026).
 Run: python seed.py
 
 Generates:
