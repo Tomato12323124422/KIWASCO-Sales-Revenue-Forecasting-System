@@ -11,18 +11,18 @@ import numpy as np
 
 # ── KIWASCO zone definitions ──────────────────────────────────────────────────
 ZONES = [
-    {"name": "Kisumu Central",  "population": 85000, "area_sqkm": 12.4, "target_revenue": 4_200_000},
-    {"name": "Kondele",         "population": 62000, "area_sqkm": 9.8,  "target_revenue": 2_800_000},
-    {"name": "Manyatta",        "population": 78000, "area_sqkm": 11.2, "target_revenue": 3_500_000},
-    {"name": "Nyalenda",        "population": 55000, "area_sqkm": 8.5,  "target_revenue": 2_200_000},
-    {"name": "Mamboleo",        "population": 41000, "area_sqkm": 15.3, "target_revenue": 1_900_000},
-    {"name": "Riat",            "population": 29000, "area_sqkm": 22.1, "target_revenue": 1_100_000},
-    {"name": "Kajulu",          "population": 24000, "area_sqkm": 18.7, "target_revenue": 950_000},
-    {"name": "Milimani",        "population": 15000, "area_sqkm": 5.4,  "target_revenue": 5_500_000},
-    {"name": "Kibos",           "population": 32000, "area_sqkm": 14.2, "target_revenue": 1_400_000},
-    {"name": "Obunga",          "population": 48000, "area_sqkm": 6.8,  "target_revenue": 1_200_000},
-    {"name": "Bandani",         "population": 21000, "area_sqkm": 9.2,  "target_revenue": 850_000},
-    {"name": "Kanyakwar",       "population": 18000, "area_sqkm": 12.5, "target_revenue": 750_000},
+    {"name": "Kisumu Central",  "population": 85000, "area_sqkm": 12.4, "target_monthly_revenue": 4_200_000},
+    {"name": "Kondele",         "population": 62000, "area_sqkm": 9.8,  "target_monthly_revenue": 2_800_000},
+    {"name": "Manyatta",        "population": 78000, "area_sqkm": 11.2, "target_monthly_revenue": 3_500_000},
+    {"name": "Nyalenda",        "population": 55000, "area_sqkm": 8.5,  "target_monthly_revenue": 2_200_000},
+    {"name": "Mamboleo",        "population": 41000, "area_sqkm": 15.3, "target_monthly_revenue": 1_900_000},
+    {"name": "Riat",            "population": 29000, "area_sqkm": 22.1, "target_monthly_revenue": 1_100_000},
+    {"name": "Kajulu",          "population": 24000, "area_sqkm": 18.7, "target_monthly_revenue": 950_000},
+    {"name": "Milimani",        "population": 15000, "area_sqkm": 5.4,  "target_monthly_revenue": 5_500_000},
+    {"name": "Kibos",           "population": 32000, "area_sqkm": 14.2, "target_monthly_revenue": 1_400_000},
+    {"name": "Obunga",          "population": 48000, "area_sqkm": 6.8,  "target_monthly_revenue": 1_200_000},
+    {"name": "Bandani",         "population": 21000, "area_sqkm": 9.2,  "target_monthly_revenue": 850_000},
+    {"name": "Kanyakwar",       "population": 18000, "area_sqkm": 12.5, "target_monthly_revenue": 750_000},
 ]
 
 # Tariff tiers (KES per cubic meter)
