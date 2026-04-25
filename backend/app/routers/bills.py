@@ -5,7 +5,7 @@ from datetime import date
 from sqlalchemy import extract, func
 from app.database import get_db
 from app import models, schemas
-from app.auth import get_current_active_user, require_admin
+from app.auth import get_current_active_user, require_admin, require_data_manager
 
 router = APIRouter(prefix="/api/bills", tags=["Bills"])
 
@@ -111,7 +111,7 @@ def zone_comparison(
     return sorted(result, key=lambda x: x["collected"], reverse=True)
 
 @router.post("/", response_model=schemas.BillOut)
-def create_bill(payload: schemas.BillCreate, db: Session = Depends(get_db), _=Depends(require_admin)):
+def create_bill(payload: schemas.BillCreate, db: Session = Depends(get_db), _=Depends(require_data_manager)):
     bill = models.Bill(**payload.model_dump())
     db.add(bill)
     db.commit()
@@ -124,7 +124,7 @@ def record_payment(
     amount: float,
     payment_date: Optional[date] = None,
     db: Session = Depends(get_db),
-    _=Depends(get_current_active_user),
+    _=Depends(require_data_manager),
 ):
     bill = db.query(models.Bill).filter(models.Bill.id == bill_id).first()
     if not bill:

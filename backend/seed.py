@@ -73,6 +73,12 @@ def seed():
                 hashed_password=get_password_hash("viewer1234"),
                 role="viewer", is_active=True,
             ),
+            models.User(
+                username="officer", email="officer@kiwasco.go.ke",
+                full_name="Billing Officer",
+                hashed_password=get_password_hash("officer1234"),
+                role="data_manager", is_active=True,
+            ),
         ]
         for u in users_to_add:
             if not db.query(models.User).filter(models.User.username == u.username).first():

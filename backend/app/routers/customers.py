@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.database import get_db
 from app import models, schemas
-from app.auth import get_current_active_user, require_admin
+from app.auth import get_current_active_user, require_admin, require_data_manager
 
 router = APIRouter(prefix="/api/customers", tags=["Customers"])
 
@@ -75,7 +75,7 @@ def get_customer(customer_id: int, db: Session = Depends(get_db), _=Depends(get_
     return c
 
 @router.post("/", response_model=schemas.CustomerOut)
-def create_customer(payload: schemas.CustomerCreate, db: Session = Depends(get_db), _=Depends(require_admin)):
+def create_customer(payload: schemas.CustomerCreate, db: Session = Depends(get_db), _=Depends(require_data_manager)):
     customer = models.Customer(**payload.model_dump())
     db.add(customer)
     db.commit()

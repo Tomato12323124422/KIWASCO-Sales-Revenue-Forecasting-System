@@ -64,3 +64,8 @@ def require_analyst(current_user: models.User = Depends(get_current_active_user)
     if current_user.role not in ["admin", "superadmin", "analyst"]:
         raise HTTPException(status_code=403, detail="Analyst access (or higher) required")
     return current_user
+
+def require_data_manager(current_user: models.User = Depends(get_current_active_user)):
+    if current_user.role not in ["admin", "superadmin", "data_manager"]:
+        raise HTTPException(status_code=403, detail="Data Management access (or higher) required")
+    return current_user

@@ -21,6 +21,7 @@ class UserRole(str, enum.Enum):
     analyst = "analyst"
     viewer = "viewer"
     superadmin = "superadmin"
+    data_manager = "data_manager"
 
 class Zone(Base):
     __tablename__ = "zones"
