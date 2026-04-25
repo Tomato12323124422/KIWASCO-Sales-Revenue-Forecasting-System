@@ -27,7 +27,7 @@ from app.ml.data_generator import (
 Base.metadata.create_all(bind=engine)
 
 START_DATE = date(2022, 1, 1)
-END_DATE   = date(2025, 1, 1)  # exclusive
+END_DATE   = date(2026, 5, 1)  # exclusive (includes April 2026)
 
 def months_between(start: date, end: date) -> int:
     delta = relativedelta(end, start)
@@ -108,16 +108,20 @@ def seed():
 
         # ── Alerts ────────────────────────────────────────────────────────
         alerts_data = [
-            {"zone_id": None, "message": "System initialized with synthetic KIWASCO billing data.",
+            {"zone_id": None, "message": "System initialized with KIWASCO historical billing data (2022-2026).",
              "threshold_type": "info", "severity": "info"},
-            {"zone_id": zone_objs[3].id, "message": f"{zone_objs[3].name}: NRW rate exceeds 35% threshold. Pipe inspection recommended.",
+            {"zone_id": zone_objs[3].id, "message": f"{zone_objs[3].name}: AI detected an unusual spike in NRW (42.5%) - possible major pipe burst on Ring Road.",
              "threshold_type": "high_nrw", "severity": "critical"},
-            {"zone_id": zone_objs[1].id, "message": f"{zone_objs[1].name}: Default rate above 20% for 3 consecutive months.",
-             "threshold_type": "defaulter_surge", "severity": "warning"},
-            {"zone_id": zone_objs[4].id, "message": f"{zone_objs[4].name}: Revenue collection below 70% of monthly target.",
+            {"zone_id": zone_objs[1].id, "message": f"{zone_objs[1].name}: Prophet model predicts a 15% revenue drop next quarter due to seasonal migration patterns.",
              "threshold_type": "revenue_drop", "severity": "warning"},
-            {"zone_id": zone_objs[0].id, "message": f"{zone_objs[0].name}: Demand projected to exceed supply capacity by Q3 2025.",
+            {"zone_id": zone_objs[4].id, "message": f"{zone_objs[4].name}: Collection efficiency at 62% - below the 85% corporate KPI.",
+             "threshold_type": "revenue_drop", "severity": "warning"},
+            {"zone_id": zone_objs[0].id, "message": f"{zone_objs[0].name}: High Demand Alert - Projected to exceed capacity by 20% during the upcoming July dry season.",
              "threshold_type": "capacity_risk", "severity": "critical"},
+            {"zone_id": zone_objs[2].id, "message": f"{zone_objs[2].name}: Anomaly Detection - 12 commercial accounts showing zero consumption despite active status.",
+             "threshold_type": "info", "severity": "warning"},
+            {"zone_id": zone_objs[5].id, "message": f"{zone_objs[5].name}: Positive Trend - Revenue collection improved by 8% following the new digital payment rollout.",
+             "threshold_type": "info", "severity": "info"},
         ]
         for ad in alerts_data:
             db.add(models.Alert(**ad))

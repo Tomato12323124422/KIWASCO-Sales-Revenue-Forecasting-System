@@ -68,6 +68,17 @@ def calculate_bill(units: float, ctype: str) -> float:
     # Add 16% VAT
     return round(total * 1.16, 2)
 
+KENYAN_NAMES = [
+    "John Otieno", "Mary Atieno", "Peter Kamau", "Jane Njeri", "David Omondi",
+    "Sarah Adhiambo", "Michael Njoroge", "Grace Wambui", "James Maina", "Alice Wanjiru",
+    "Joseph Onyango", "Rose Akoth", "Daniel Mwangi", "Lucy Wanjiku", "Samuel Kimani",
+    "Catherine Ngina", "Francis Mutua", "Elizabeth Syokau", "George Kariuki", "Margaret Nyambura",
+    "Paul Odhiambo", "Ann Awuor", "Andrew Wafula", "Susan Nafula", "Patrick Murungi",
+    "Joyce Karimi", "Charles Macharia", "Phyllis Mumbi", "Henry Kipkorir", "Beatrice Chebet",
+    "Thomas Rotich", "Lydia Cherono", "Kevin Kipchumba", "Faith Jemutai", "Victor Simiyu",
+    "Mercy Nasimiyu", "Moses Wabwire", "Janet Nekesa", "Anthony Barasa", "Sharon Namukuza"
+]
+
 def generate_customers(zone_id: int, zone_name: str, count: int):
     customers = []
     for i in range(1, count + 1):
@@ -78,10 +89,21 @@ def generate_customers(zone_id: int, zone_name: str, count: int):
         acc_no = f"KWS{zone_id:02d}{i:04d}"
         meter_no = f"MTR{zone_id:02d}{i:04d}"
         conn_date = date(2015, 1, 1) + timedelta(days=random.randint(0, 3000))
+        
+        # Use realistic names for domestic, and descriptive names for others
+        if ctype == "domestic":
+            name = f"{random.choice(KENYAN_NAMES)} ({acc_no})"
+        elif ctype == "commercial":
+            name = f"{random.choice(['Sunset Hotel', 'Lake Side Mall', 'K-Plaza', 'Mega City', 'Imperial Hotel', 'Victoria Bakery'])} - {acc_no}"
+        elif ctype == "industrial":
+            name = f"{random.choice(['Tura Bottlers', 'Kemu Miller', 'Kisumu Steel', 'Blue Nile Millers'])} - {acc_no}"
+        else: # institutional
+            name = f"{random.choice(['Kisumu Academy', 'St. Peters School', 'Central Hospital', 'Nyalenda Health Centre'])} - {acc_no}"
+
         customers.append({
             "zone_id": zone_id,
             "account_no": acc_no,
-            "name": f"Customer {acc_no}",
+            "name": name,
             "customer_type": ctype,
             "meter_no": meter_no,
             "phone": f"07{random.randint(10000000, 99999999)}",
