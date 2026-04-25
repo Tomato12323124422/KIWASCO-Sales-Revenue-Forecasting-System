@@ -88,6 +88,8 @@ def seed():
             # ONLY generate for zones that have no customers (newly added zones)
             if db.query(models.Customer).filter(models.Customer.zone_id == zone.id).count() > 0:
                 continue
+
+            count = get_zone_customer_count(zone.name, zone.population)
             # Cap for performance during seeding
             count = min(count, 150)
             customer_dicts = generate_customers(zone.id, zone.name, count)
