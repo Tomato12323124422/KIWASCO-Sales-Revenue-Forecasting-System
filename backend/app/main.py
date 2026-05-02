@@ -7,6 +7,21 @@ from app import models
 from app.routers import auth, zones, customers, bills, forecasts, dashboard, reports
 from app.auth import require_admin
 import logging
+import sys
+import os
+import threading
+import webbrowser
+import time
+
+# ── PyInstaller path fix ─────────────────────────────────────────────────────
+# When running as a packaged .exe, files live in sys._MEIPASS (temp dir)
+# When running normally, they live relative to main.py
+def get_base_path():
+    if getattr(sys, 'frozen', False):
+        return sys._MEIPASS
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
+
+BASE_PATH = get_base_path()
 
 app = FastAPI(
     title="KIWASCO Sales & Revenue Forecasting API",
@@ -54,7 +69,6 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-import os
 
 # Register routers
 app.include_router(auth.router)
@@ -66,23 +80,33 @@ app.include_router(dashboard.router)
 app.include_router(reports.router)
 
 # ── Static Files (Frontend) ──────────────────────────────────────────────
-# In stand-alone mode, we serve the React build folder
-frontend_path = os.path.join(os.getcwd(), "frontend", "dist")
+# Use BASE_PATH which correctly resolves in both .exe and dev modes
+frontend_path = os.path.join(BASE_PATH, "frontend", "dist")
 
 if os.path.exists(frontend_path):
-    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_path, "assets")), name="assets")
+    assets_path = os.path.join(frontend_path, "assets")
+    if os.path.exists(assets_path):
+        app.mount("/assets", StaticFiles(directory=assets_path), name="assets")
 
     @app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
-        # Serve the index.html for any route not caught by the API
         return FileResponse(os.path.join(frontend_path, "index.html"))
 else:
     @app.get("/")
     def root():
         return {
             "system": "KIWASCO Sales & Revenue Forecasting System",
-            "status": "Frontend not found. Please run 'npm run build' in the frontend directory.",
+            "status": f"Frontend not found at {frontend_path}. Run 'npm run build' in the frontend directory.",
         }
+
+# ── Auto-launch browser (stand-alone mode only) ──────────────────────────
+def _open_browser():
+    time.sleep(2)  # wait for server to be ready
+    webbrowser.open("http://localhost:8000")
+
+if getattr(sys, 'frozen', False):
+    # Only auto-open when running as a packaged .exe
+    threading.Thread(target=_open_browser, daemon=True).start()
 
 @app.get("/health")
 def health():
