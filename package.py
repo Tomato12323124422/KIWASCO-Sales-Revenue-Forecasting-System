@@ -5,52 +5,59 @@ import sys
 
 def build():
     print("🚀 Starting Stand-alone Build Process...")
-    
-    # Get absolute paths to avoid confusion with spaces/special characters
+
+    # Get absolute paths
     root_dir = os.path.abspath(os.getcwd())
     frontend_dir = os.path.join(root_dir, "frontend")
     backend_dir = os.path.join(root_dir, "backend")
 
-    # 1. Build Frontend
+    # 1. Build Frontend — call vite DIRECTLY to avoid npm path-splitting issues
     print(f"\n📦 Building Frontend in: {frontend_dir}")
-    os.chdir(frontend_dir)
-    
-    # Use shell=True with triple quotes for Windows path safety
+
+    # Path to vite executable inside node_modules
+    vite_script = os.path.join(frontend_dir, "node_modules", "vite", "bin", "vite.js")
+
+    if not os.path.exists(vite_script):
+        print("   > node_modules not found. Running npm install first...")
+        subprocess.run(["npm", "install"], cwd=frontend_dir, check=True)
+
+    if not os.path.exists(vite_script):
+        print(f"❌ Vite not found at: {vite_script}")
+        sys.exit(1)
+
+    print("   > Running vite build directly...")
     try:
-        print("   > Running npm install...")
-        subprocess.run('npm install', shell=True, check=True)
-        print("   > Running npm run build...")
-        subprocess.run('npm run build', shell=True, check=True)
+        # Call node with the vite.js script directly — no shell, no path splitting
+        subprocess.run(
+            ["node", vite_script, "build"],
+            cwd=frontend_dir,
+            check=True
+        )
     except subprocess.CalledProcessError as e:
         print(f"\n❌ Frontend build failed: {e}")
         sys.exit(1)
-    
-    os.chdir(root_dir)
+
+    print("   ✔ Frontend built successfully!")
 
     # 2. Package with PyInstaller
     print("\n🔨 Packaging with PyInstaller...")
-    
-    # Define data files with quotes for Windows
-    # Syntax: "source;destination"
-    frontend_data = f"{os.path.join(frontend_dir, 'dist')}{os.pathsep}{os.path.join('frontend', 'dist')}"
-    backend_data = f"{os.path.join(backend_dir, 'app')}{os.pathsep}app"
-    
+    dist_src = os.path.join(frontend_dir, "dist")
+    dist_dst  = os.path.join("frontend", "dist")
+
     cmd = [
         "pyinstaller",
         "--noconfirm",
         "--onefile",
         "--name=KIWASCO-Forecasting-System",
-        f"--add-data={frontend_data}",
-        f"--add-data={backend_data}",
+        f"--add-data={dist_src}{os.pathsep}{dist_dst}",
         os.path.join(backend_dir, "app", "main.py")
     ]
-    
-    print(f"   > Command: {' '.join(cmd)}")
-    
+
     try:
         subprocess.run(cmd, check=True)
-        print("\n✅ Build Complete! Your stand-alone app is in the 'dist' folder.")
-        print("Path: " + os.path.join(root_dir, "dist", "KIWASCO-Forecasting-System.exe"))
+        exe_path = os.path.join(root_dir, "dist", "KIWASCO-Forecasting-System.exe")
+        print(f"\n✅ Build Complete!")
+        print(f"   Your standalone app is at: {exe_path}")
     except subprocess.CalledProcessError as e:
         print(f"\n❌ Packaging failed: {e}")
         sys.exit(1)
