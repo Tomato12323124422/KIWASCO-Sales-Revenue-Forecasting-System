@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
+import { useAuth } from '../context/AuthContext'
 import { customersApi, zonesApi } from '../api/client'
-import { Users, AlertTriangle, Filter, Search, UserCheck, UserX } from 'lucide-react'
+import { Users, AlertTriangle, Filter, Search, UserCheck, UserX, Plus, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const fmt = (n) => n >= 1e6 ? `KES ${(n/1e6).toFixed(2)}M` : n >= 1e3 ? `KES ${(n/1e3).toFixed(1)}K` : `KES ${n?.toFixed(0)}`
 
 export default function Customers() {
+  const { user } = useAuth()
   const [zones, setZones]             = useState([])
   const [customers, setCustomers]     = useState([])
   const [defaulters, setDefaulters]   = useState([])
@@ -14,7 +16,20 @@ export default function Customers() {
   const [tab, setTab]                 = useState('list') // list | defaulters
   const [filters, setFilters]         = useState({ zone_id: '', customer_type: '', search: '' })
 
+  // Modal State
+  const [showAdd, setShowAdd] = useState(false)
+  const [formData, setFormData] = useState({
+    name: '', account_no: '', zone_id: '', customer_type: 'domestic',
+    meter_no: '', phone: '', address: '', connection_date: new Date().toISOString().split('T')[0]
+  })
+
+  const canAdd = user?.role === 'admin' || user?.role === 'superadmin' || user?.role === 'data_manager'
+
   useEffect(() => {
+    fetchData()
+  }, [])
+
+  const fetchData = () => {
     Promise.all([
       zonesApi.list(),
       customersApi.list({ limit: 100 }),
@@ -27,7 +42,23 @@ export default function Customers() {
       setDefaulters(d.data)
       setLoading(false)
     }).catch(() => { toast.error('Failed to load customers'); setLoading(false) })
-  }, [])
+  }
+
+  const handleAdd = async (e) => {
+    e.preventDefault()
+    try {
+      await customersApi.create({ ...formData, zone_id: parseInt(formData.zone_id) })
+      toast.success('Customer added successfully')
+      setShowAdd(false)
+      setFormData({
+        name: '', account_no: '', zone_id: '', customer_type: 'domestic',
+        meter_no: '', phone: '', address: '', connection_date: new Date().toISOString().split('T')[0]
+      })
+      fetchData()
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to add customer')
+    }
+  }
 
   const applyFilters = async () => {
     try {
@@ -71,9 +102,16 @@ export default function Customers() {
   return (
     <div>
       <div className="page-header">
-        <div>
-          <div className="page-header-title">Customer Analytics</div>
-          <div className="page-header-sub">Customer records, defaulter tracking, and payment behavior analysis</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%' }}>
+          <div>
+            <div className="page-header-title">Customer Analytics</div>
+            <div className="page-header-sub">Customer records, defaulter tracking, and payment behavior analysis</div>
+          </div>
+          {canAdd && (
+            <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
+              <Plus size={16} style={{ marginRight: 6 }} /> New Customer
+            </button>
+          )}
         </div>
       </div>
 
@@ -242,6 +280,74 @@ export default function Customers() {
           </div>
         )}
       </div>
+
+      {/* Add Customer Modal */}
+      {showAdd && (
+        <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
+          <div className="card fade-up" style={{ maxWidth: 600, width: '100%', padding: 24, boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <div style={{ fontSize: 18, fontWeight: 700 }}>Add New Customer</div>
+              <button className="btn-icon" onClick={() => setShowAdd(false)}><X size={20} /></button>
+            </div>
+            <form onSubmit={handleAdd}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label className="form-label">Full Name</label>
+                  <input className="form-input" required value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })} />
+                </div>
+                <div>
+                  <label className="form-label">Account No</label>
+                  <input className="form-input" required value={formData.account_no}
+                    onChange={e => setFormData({ ...formData, account_no: e.target.value })} />
+                </div>
+                <div>
+                  <label className="form-label">Meter No</label>
+                  <input className="form-input" value={formData.meter_no}
+                    onChange={e => setFormData({ ...formData, meter_no: e.target.value })} />
+                </div>
+                <div>
+                  <label className="form-label">Service Zone</label>
+                  <select className="form-select" required value={formData.zone_id}
+                    onChange={e => setFormData({ ...formData, zone_id: e.target.value })}>
+                    <option value="">Select Zone…</option>
+                    {zones.map(z => <option key={z.id} value={z.id}>{z.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="form-label">Customer Type</label>
+                  <select className="form-select" value={formData.customer_type}
+                    onChange={e => setFormData({ ...formData, customer_type: e.target.value })}>
+                    <option value="domestic">Domestic</option>
+                    <option value="commercial">Commercial</option>
+                    <option value="industrial">Industrial</option>
+                    <option value="institutional">Institutional</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="form-label">Phone Number</label>
+                  <input className="form-input" value={formData.phone}
+                    onChange={e => setFormData({ ...formData, phone: e.target.value })} />
+                </div>
+                <div>
+                  <label className="form-label">Connection Date</label>
+                  <input className="form-input" type="date" value={formData.connection_date}
+                    onChange={e => setFormData({ ...formData, connection_date: e.target.value })} />
+                </div>
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label className="form-label">Physical Address</label>
+                  <textarea className="form-input" rows={2} value={formData.address}
+                    onChange={e => setFormData({ ...formData, address: e.target.value })} />
+                </div>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+                <button type="button" className="btn" onClick={() => setShowAdd(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary">Create Customer</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

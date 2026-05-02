@@ -52,6 +52,10 @@ async def global_exception_handler(request: Request, exc: Exception):
         response.headers["Access-Control-Allow-Credentials"] = "true"
     return response
 
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
+
 # Register routers
 app.include_router(auth.router)
 app.include_router(zones.router)
@@ -61,14 +65,24 @@ app.include_router(forecasts.router)
 app.include_router(dashboard.router)
 app.include_router(reports.router)
 
-@app.get("/")
-def root():
-    return {
-        "system": "KIWASCO Sales & Revenue Forecasting System",
-        "version": "1.0.0",
-        "status": "operational",
-        "docs": "/api/docs",
-    }
+# ── Static Files (Frontend) ──────────────────────────────────────────────
+# In stand-alone mode, we serve the React build folder
+frontend_path = os.path.join(os.getcwd(), "frontend", "dist")
+
+if os.path.exists(frontend_path):
+    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_path, "assets")), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        # Serve the index.html for any route not caught by the API
+        return FileResponse(os.path.join(frontend_path, "index.html"))
+else:
+    @app.get("/")
+    def root():
+        return {
+            "system": "KIWASCO Sales & Revenue Forecasting System",
+            "status": "Frontend not found. Please run 'npm run build' in the frontend directory.",
+        }
 
 @app.get("/health")
 def health():

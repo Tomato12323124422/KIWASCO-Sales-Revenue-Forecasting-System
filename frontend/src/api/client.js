@@ -58,6 +58,7 @@ export const customersApi = {
   list:       (params) => api.get('/api/customers/', { params }),
   count:      (zone_id) => api.get('/api/customers/count', { params: { zone_id } }),
   defaulters: (zone_id) => api.get('/api/customers/defaulters', { params: { zone_id } }),
+  create:     (data) => api.post('/api/customers/', data),
 }
 
 export const billsApi = {
