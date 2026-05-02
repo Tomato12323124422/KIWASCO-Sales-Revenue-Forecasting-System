@@ -41,11 +41,20 @@ def build():
 
     # 2. Package with PyInstaller
     print("\n🔨 Packaging with PyInstaller...")
+
+    # Auto-install PyInstaller if not available
+    try:
+        import PyInstaller
+    except ImportError:
+        print("   > PyInstaller not found. Installing...")
+        subprocess.run([sys.executable, "-m", "pip", "install", "pyinstaller"], check=True)
+
     dist_src = os.path.join(frontend_dir, "dist")
     dist_dst  = os.path.join("frontend", "dist")
 
+    # Use sys.executable -m PyInstaller to avoid PATH issues on Windows
     cmd = [
-        "pyinstaller",
+        sys.executable, "-m", "PyInstaller",
         "--noconfirm",
         "--onefile",
         "--name=KIWASCO-Forecasting-System",
