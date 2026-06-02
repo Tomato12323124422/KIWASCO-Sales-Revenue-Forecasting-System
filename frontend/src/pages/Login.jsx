@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
@@ -7,12 +7,19 @@ import toast from 'react-hot-toast'
 import { Droplets, Eye, EyeOff, LogIn } from 'lucide-react'
 
 export default function Login() {
-  const { login } = useAuth()
+  const { login, user } = useAuth()
   const navigate  = useNavigate()
 
   const [form, setForm]       = useState({ username: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [showPw, setShowPw]   = useState(false)
+
+  // Redirect to dashboard once user state is set
+  useEffect(() => {
+    if (user) {
+      navigate('/', { replace: true })
+    }
+  }, [user, navigate])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -21,7 +28,7 @@ export default function Login() {
     try {
       await login(form.username, form.password)
       toast.success('Welcome to KIWASCO System!')
-      navigate('/')
+      // navigation now handled by useEffect above
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Login failed. Check credentials.')
     } finally {
