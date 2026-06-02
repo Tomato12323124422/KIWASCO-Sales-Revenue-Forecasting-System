@@ -103,6 +103,7 @@ def seed():
                 total_bills += len(bill_dicts)
             total_customers += count
             print(f"    → {zone.name}: {count} customers, {count * months} bills")
+            db.commit() # Commit per zone to avoid OOM
 
         print(f"  ✔ {total_customers} customers, {total_bills} bills created")
 
